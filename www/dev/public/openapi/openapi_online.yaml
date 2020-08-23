@@ -1,0 +1,125 @@
+openapi: 3.0.0
+info:
+  title: 'Xiag AG Poll Project'
+  description: 'Poll website task'
+  version: '1.0'
+servers:
+  -
+    url: 'http://localhost:8082'
+    description: 'Dev stage'
+paths:
+  /: {  }
+  /poll/vote:
+    post:
+      tags:
+        - Poll
+      summary: 'Save vote of user'
+      operationId: 'app\controllers\PollController::actionVote'
+      requestBody:
+        description: 'Vote information'
+        content:
+          application/json:
+            schema:
+              properties:
+                questionUid:
+                  description: 'UID of question'
+                  type: string
+                  example: 15981979755f4290d7d1041
+                variantId:
+                  description: 'UID of question'
+                  type: integere
+                  example: 315
+                userName:
+                  description: 'User name'
+                  type: string
+                  example: 'Steve Jobs'
+              type: object
+      responses:
+        '400':
+          description: Error
+        '200':
+          description: Ok
+  /question/create:
+    post:
+      tags:
+        - Question
+      summary: 'Create new question'
+      operationId: 'app\controllers\QuestionController::actionCreate'
+      requestBody:
+        description: 'Question information'
+        content:
+          application/json:
+            schema:
+              properties:
+                question:
+                  description: 'Main information about question'
+                  properties: { title: { description: 'Title of question', type: string, example: 'How old are you?' } }
+                  type: object
+                variants:
+                  type: array
+                  items: { allOf: [{ $ref: '#/components/schemas/Variant' }] }
+              type: object
+      responses:
+        '400':
+          description: Error
+        '200':
+          description: 'Return information about question created'
+  '/question/show/{questionUid}':
+    get:
+      tags:
+        - Question
+      summary: 'Summary data to display question page. Method also returns information about how current user voted to this question'
+      operationId: 'app\controllers\QuestionController::actionShow'
+      parameters:
+        -
+          name: questionUid
+          in: path
+          description: 'Question UID'
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Error
+        '200':
+          description: 'Summary data to display question page'
+  '/question/statistic/{questionUid}':
+    get:
+      tags:
+        - Question
+      summary: 'Poll statistic for Question'
+      operationId: 'app\controllers\QuestionController::actionStatistic'
+      parameters:
+        -
+          name: questionUid
+          in: path
+          description: 'Question UID'
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Error
+        '200':
+          description: 'Statistic data'
+components:
+  schemas:
+    Question:
+      xml:
+        name: Question
+    Variant:
+      properties:
+        title:
+          description: 'Title of some answer to question'
+          type: string
+          example: 10-36
+      type: object
+      xml:
+        name: Variant
+tags:
+  -
+    name: Poll
+    description: 'Voting process'
+  -
+    name: Question
+    description: 'Base methods for question process'

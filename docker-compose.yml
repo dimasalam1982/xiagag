@@ -1,0 +1,91 @@
+version: '3.3'
+
+services:
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    env_file:
+      - .env
+    ports:
+      - 8081:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=${MYSQL_HOST}
+      - PMA_PORT=${MYSQL_PORT}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    depends_on:
+      - mysql
+    hostname: phpmyadmin
+    networks:
+      - project-net
+
+  #### MySQL ####
+  mysql:
+    env_file:
+      - .env
+    image: mysql:5.7
+    command: --sql_mode=""
+    environment:
+      TZ: ${TZ}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DB: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    ports:
+      - 3309:3306
+    volumes:
+      - ./docker/mysql/dump:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql
+    hostname: mysql
+    networks:
+      - project-net
+
+  php-fpm:
+    container_name: xiag_php_fpm
+    build:
+      context: ./
+      dockerfile: docker/php-fpm/Dockerfile
+    env_file:
+      - .env
+    restart: unless-stopped
+    tty: true
+    working_dir: /var/www/
+    volumes:
+      - ./www:/var/www
+    depends_on:
+      - mysql
+    ports:
+      - 9000:9000
+    hostname: php-fpm
+    networks:
+      - project-net
+
+  nginx:
+    build:
+      context: ./
+      dockerfile: docker/nginx/Dockerfile
+    env_file:
+      - .env
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - ./www:/var/www
+    depends_on:
+      - php-fpm
+    ports:
+      - "8082:80"
+      - "443:443"
+    hostname: nginx
+    networks:
+      - project-net
+
+networks:
+  project-net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
