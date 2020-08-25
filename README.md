@@ -17,7 +17,7 @@ Backend created with native PHP as API. You can use Swagger UI to research API. 
 
 Recommended operation system is Ubuntu 20. Further documentation refers to Ubuntu.
 
-This project based on docker images. There for you need to install docker (https://docs.docker.com/engine/install/ubuntu/) and docker-compose (https://docs.docker.com/compose/install/)
+This project based on docker images. Therefore you need to install docker (https://docs.docker.com/engine/install/ubuntu/) and docker-compose (https://docs.docker.com/compose/install/)
 
 You need free ports 8081 and 8082.
 
